@@ -1,63 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
-
-const tags = {
-  animals: "animals",
-  church: "church",
-  craft: "craft",
-  exercise: "exercise",
-  food: "food",
-  free: "free",
-  learning: "learning",
-  musical: "musical",
-  indoors: "indoors",
-  outdoors: "outdoors",
-  sensory: "sensory",
-  snow: "snow",
-};
-
-const activities = [
-  {
-    name: "Go on a walk",
-    tags: [tags.outdoors, tags.exercise, tags.free],
-  },
-  {
-    name: "Paint",
-    tags: [tags.indoors, tags.craft, tags.free],
-  },
-  {
-    name: "Go to the duck pond",
-    tags: [tags.outdoors, tags.free, tags.animals]
-  },
-  {
-    name: "Build a snowman",
-    tags: [tags.outdoors, tags.free, tags.snow]
-  },
-  {
-    name: "Read stories about Jesus",
-    tags: [tags.indoors, tags.free, tags.church, tags.learning]
-  },
-  {
-    name: "Tell stories about your ancestors",
-    tags: [tags.indoors, tags.free, tags.church, tags.learning]
-  },
-  {
-    name: "Read a book",
-    tags: [tags.indoors, tags.free, tags.learning]
-  },
-  {
-    name: "Sing a silly song",
-    tags: [tags.indoors, tags.free, tags.learning, tags.musical]
-  },
-  {
-    name: "Bake cookies",
-    tags: [tags.indoors, tags.free, tags.food]
-  },
-  {
-    name: "Make a rice sensory bin",
-    tags: [tags.indoors, tags.free, tags.sensory]
-  },
-];
+import tags from './tags.json';
+import activities from './activities.json';
 
 function Headline(props) {
   return (
@@ -68,12 +12,40 @@ function Headline(props) {
 function FilterChip(props) {
   return (
     <button
-      className={[props.isSelected ? "selected-filter" : "unselected-filter"]}
+      className={`
+      ${props.isSelected ? 'selected-filter' : 'unselected-filter'}
+      ${props.isAvailable ? '' : 'unavailable-filter'}
+      `}
       onClick={() => props.onClick(props.tag)}
     >
       {props.tag}
     </button>
   )
+}
+
+function FilterGroup(props) {
+  const filters = [];
+  for (const tag of tags) {
+    filters.push(
+      <FilterChip
+        isAvailable={
+          props.availableFilters.includes(tag)
+        }
+        isSelected={
+          props.selectedFilters.includes(tag)
+        }
+        key={tag}
+        onClick={() => props.addRemoveFilter(tag)}
+        tag={tag}
+      />
+    );
+  }
+
+  return (
+    <div className="filter-group">
+      {filters}
+    </div>
+  );
 }
 
 function RandomizeButton(props) {
@@ -82,112 +54,120 @@ function RandomizeButton(props) {
       className="randomize-button"
       onClick={() => props.onClick()}
     >
-      Select activity
+      {props.clicked ? 'Select a different activity' : 'Select activity'}
     </button>
   );
 }
 
 function ActivitySuggestion(props) {
   return (
-    <div className="activity-suggestion">
+    <div className={`
+      activity-suggestion 
+      ${props.clicked ? 'clicked' : ''}
+      `}
+    >
       <p>You should</p>
       <h3>{props.activity}!</h3>
     </div>
   );
 }
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedFilters: [],
-      currentSuggestion: null,
-    }
-  }
+function useFilters(initialState) {
+  const [selectedFilters, setSelectedFilters] = useState(initialState || []);
 
-  handleFilterClick(tag) {
-    if (this.state.selectedFilters.some((item) => item === tag)) {
-      this.setState(prevState => ({
-        selectedFilters: prevState.selectedFilters.filter((item) => item !== tag)
-      }))
+  //Given a filter, adds it to selectedFilters if it's not already there, or removes it if it is already there.
+  const addRemoveFilter = (filter) => {
+    //If the filter is already in selectedFilters...
+    if (selectedFilters.some((item) => item === filter)) {
+      setSelectedFilters(prevFilters => prevFilters.filter((item) => item !== filter));
     } else {
-      this.setState(prevState => ({
-        selectedFilters: [...prevState.selectedFilters, tag]
-      }));
+      setSelectedFilters(prevFilters => [...prevFilters, filter]);
     }
   }
 
-  pickRandomNumber(activitiesArray) {
-    return Math.floor(Math.random() * activitiesArray.length);
-  }
+  return [selectedFilters, addRemoveFilter];
+}
 
-  handleSelectClick(tags) {
-    let filteredActivities = [];
+function randomSelection(currentSuggestion, selectedFilters) {
+  let filteredActivities = [];
 
-    //Filter activities
-    if (this.state.selectedFilters.length === 0) {
-      for (const item in activities) {
+  //Filter activities
+  if (selectedFilters.length === 0) {
+    for (const item in activities) {
+      filteredActivities.push(activities[item].name);
+    }
+  } else {
+    for (const item in activities) {
+      const isInActivityTags = (filter) => activities[item].tags.includes(filter);
+      //If an activity includes all of the selected filters...
+      if (selectedFilters.every(isInActivityTags)) {
         filteredActivities.push(activities[item].name);
       }
-    } else {
-      for (const item in activities) {
-        //If an activity's tags match one of the selected filters...
-        if (activities[item].tags.some((item) => this.state.selectedFilters.includes(item))) {
-          filteredActivities.push(activities[item].name);
-        }
-      }
     }
+  }
 
-    //If one of the activities in the list is the same as the activity that's currently being suggested, take it out
-    filteredActivities = filteredActivities.filter(item => item !== this.state.currentSuggestion);
+  //If one of the activities in the list is the same as the activity that's currently being suggested, take it out
+  filteredActivities = filteredActivities.filter(item => item !== currentSuggestion);
 
-    //Select random activity
-    let randomActivity;
-    if (filteredActivities.length >= 1) {
-      randomActivity = filteredActivities[this.pickRandomNumber(filteredActivities)];
-    } else {
-      randomActivity = this.state.currentSuggestion;
-    }
+  let randomActivity;
+  //If there aren't any other viable activities besides the one that's already being suggested...
+  if (filteredActivities.length === 0) {
+    randomActivity = currentSuggestion;
+  } else {
+    const randomNum = Math.floor(Math.random() * filteredActivities.length);
+    randomActivity = filteredActivities[randomNum];
+  }
+  return randomActivity;
+}
+
+function App(props) {
+  const [currentSuggestion, setCurrentSuggestion] = useState(null);
+  const [hasBeenClicked, setHasBeenClicked] = useState(false);
+  const [selectedFilters, addRemoveFilter] = useFilters();
+
+  const handleSelectClick = () => {
+    const randomActivity = randomSelection(currentSuggestion, selectedFilters);
 
     //Set suggestion
-    this.setState(prevState => ({
-      currentSuggestion: randomActivity
-    }))
+    setCurrentSuggestion(randomActivity);
 
     //Show suggestion
-    const activityElement = document.querySelector('.activity-suggestion');
-    if (!activityElement.classList.contains('clicked')) {
-      activityElement.classList.add('clicked');
-      document.querySelector('.randomize-button').innerHTML = 'Select a different activity';
+    if (!hasBeenClicked) {
+      setHasBeenClicked(true);
     }
   }
 
-  render() {
-    const filters = [];
-    for (const tag in tags) {
-      filters.push(
-        <FilterChip
-          isSelected={
-            this.state.selectedFilters.some((item) => item === tags[tag])
-          }
-          key={tag}
-          onClick={() => this.handleFilterClick(tag)}
-          tag={tags[tag]}
-        />
-      );
-    }
+  // Only show available filters
+  const availableFilters = new Set();
 
-    return (
-      <div className="app">
-        <Headline />
-        <div className="filter-group">
-          {filters}
-        </div>
-        <RandomizeButton onClick={() => this.handleSelectClick()} />
-        <ActivitySuggestion activity={this.state.currentSuggestion} />
-      </div>
-    );
+  for (const activity of activities) {
+    //If the activity item's tags contain ALL of the filters in the selectedFilters list...
+    if (selectedFilters.every(filter => activity.tags.includes(filter))) {
+      for (const tag of activity.tags) {
+        availableFilters.add(tag);
+      }
+    }
   }
+
+  return (
+    <div className="app">
+      <Headline />
+      <FilterGroup
+        addRemoveFilter={addRemoveFilter}
+        availableFilters={[...availableFilters]}
+        selectedFilters={selectedFilters}
+      />
+      <RandomizeButton
+        clicked={hasBeenClicked}
+        onClick={handleSelectClick}
+      />
+      <ActivitySuggestion
+        activity={currentSuggestion}
+        clicked={hasBeenClicked}
+      />
+    </div>
+  );
+
 }
 
 export default App;

@@ -26,6 +26,10 @@ h1 {
   margin: 40px 0;
 }
 
+.unavailable-filter {
+  display: none;
+}
+
 .selected-filter, .unselected-filter {
   background-color: rgb(207, 207, 207);
   border: solid 3px transparent;

@@ -1,76 +1,10 @@
 import React, { useState } from 'react';
 import './App.css';
-import tags from './tags.json';
 import activities from './activities.json';
-
-function Headline(props) {
-  return (
-    <h1>What should you do with your kids today?</h1>
-  );
-}
-
-function FilterChip(props) {
-  return (
-    <button
-      className={`
-      ${props.isSelected ? 'selected-filter' : 'unselected-filter'}
-      ${props.isAvailable ? '' : 'unavailable-filter'}
-      `}
-      onClick={() => props.onClick(props.tag)}
-    >
-      {props.tag}
-    </button>
-  )
-}
-
-function FilterGroup(props) {
-  const filters = [];
-  for (const tag of tags) {
-    filters.push(
-      <FilterChip
-        isAvailable={
-          props.availableFilters.includes(tag)
-        }
-        isSelected={
-          props.selectedFilters.includes(tag)
-        }
-        key={tag}
-        onClick={() => props.addRemoveFilter(tag)}
-        tag={tag}
-      />
-    );
-  }
-
-  return (
-    <div className="filter-group">
-      {filters}
-    </div>
-  );
-}
-
-function RandomizeButton(props) {
-  return (
-    <button
-      className="randomize-button"
-      onClick={() => props.onClick()}
-    >
-      {props.clicked ? 'Select a different activity' : 'Select activity'}
-    </button>
-  );
-}
-
-function ActivitySuggestion(props) {
-  return (
-    <div className={`
-      activity-suggestion 
-      ${props.clicked ? 'clicked' : ''}
-      `}
-    >
-      <p>You should</p>
-      <h3>{props.activity}!</h3>
-    </div>
-  );
-}
+import Headline from './components/Headline';
+import FilterGroup from './components/FilterGroup';
+import RandomizeButton from './components/RandomizeButton';
+import ActivitySuggestion from './components/ActivitySuggestion';
 
 function useFilters(initialState) {
   const [selectedFilters, setSelectedFilters] = useState(initialState || []);

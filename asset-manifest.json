@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/kid-app/static/css/main.b6e2c7d8.chunk.css",
+    "main.js": "/kid-app/static/js/main.39c1640d.chunk.js",
+    "main.js.map": "/kid-app/static/js/main.39c1640d.chunk.js.map",
+    "runtime-main.js": "/kid-app/static/js/runtime-main.d8b4da60.js",
+    "runtime-main.js.map": "/kid-app/static/js/runtime-main.d8b4da60.js.map",
+    "static/js/2.011b16aa.chunk.js": "/kid-app/static/js/2.011b16aa.chunk.js",
+    "static/js/2.011b16aa.chunk.js.map": "/kid-app/static/js/2.011b16aa.chunk.js.map",
+    "static/js/3.17a1f017.chunk.js": "/kid-app/static/js/3.17a1f017.chunk.js",
+    "static/js/3.17a1f017.chunk.js.map": "/kid-app/static/js/3.17a1f017.chunk.js.map",
+    "index.html": "/kid-app/index.html",
+    "static/css/main.b6e2c7d8.chunk.css.map": "/kid-app/static/css/main.b6e2c7d8.chunk.css.map",
+    "static/js/2.011b16aa.chunk.js.LICENSE.txt": "/kid-app/static/js/2.011b16aa.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.d8b4da60.js",
+    "static/js/2.011b16aa.chunk.js",
+    "static/css/main.b6e2c7d8.chunk.css",
+    "static/js/main.39c1640d.chunk.js"
+  ]
+}

@@ -17,7 +17,7 @@ jobs:
           node-version: '16'
       - run: |
           npm i
-          npm run build
+          DISABLE_ESLINT_PLUGIN=true npm run build
           cd build
           git init
           # type configurations: your user.email and user.name followed lines 

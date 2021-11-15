@@ -2,6 +2,7 @@
   "name": "kid-app",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://emilyswhiting.github.io/kid-app",
   "dependencies": {
     "@emotion/react": "^11.5.0",
     "@testing-library/jest-dom": "^5.14.1",
